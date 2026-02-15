@@ -1,6 +1,6 @@
 # CLAUDE.md — Primitives
 
-Primitives is a Rust+Python library of 116 pure mathematical functions
+Primitives is a Rust+Python library of 281 pure mathematical functions
 for signal analysis and dynamical systems. Arrays in, numbers out. Nothing else.
 
 **Primitives is a calculator.** You hand it numbers, it hands numbers back.
@@ -102,14 +102,14 @@ primitives/
 │       ├── mod.rs
 │       └── delay.rs              # optimal_delay, time_delay_embedding, optimal_dimension
 │
-├── python/                       # Python implementations (all 116 primitives)
+├── python/                       # Python implementations (all 281 primitives)
 │   └── primitives/
 │       ├── __init__.py           # PRIMITIVES_USE_RUST toggle, re-exports
 │       ├── _config.py            # USE_RUST env var reader
 │       ├── config.py             # Centralized default parameters
 │       ├── complexity.py         # Backward compat (original flat file)
 │       ├── dynamics.py           # Backward compat (original flat file)
-│       ├── individual/           # Single-signal: statistics, spectral, entropy, fractal, etc.
+│       ├── individual/           # Single-signal (20 modules): statistics, spectral, entropy, fractal, acf, continuity, etc.
 │       ├── pairwise/             # Two-signal: correlation, causality, distance, etc.
 │       ├── dynamical/            # Chaos: lyapunov, dimension, rqa, ftle, saddle
 │       ├── matrix/               # All-signal: covariance, decomposition, dmd, graph
@@ -117,15 +117,35 @@ primitives/
 │       ├── information/          # Info theory: entropy, divergence, mutual info, transfer
 │       ├── network/              # Graph metrics: centrality, community, paths, structure
 │       ├── topology/             # Persistent homology: persistence, distance
-│       └── stat_tests/           # Statistical tests: hypothesis, bootstrap, stationarity
+│       └── stat_tests/           # Statistical tests: hypothesis, bootstrap, stationarity, volatility
 │
-└── tests/                        # pytest
-    ├── test_hurst.py
-    ├── test_permutation_entropy.py
-    ├── test_sample_entropy.py
-    ├── test_lyapunov.py
-    ├── test_optimal_delay.py
-    └── test_rust_python_parity.py
+├── tests/                        # Unit tests (58 tests)
+│   ├── test_hurst.py
+│   ├── test_permutation_entropy.py
+│   ├── test_sample_entropy.py
+│   ├── test_lyapunov.py
+│   ├── test_optimal_delay.py
+│   └── test_rust_python_parity.py
+│
+└── validation/                   # Ground-truth validation suite (90 tests)
+    ├── conftest.py               # Shared fixtures (white noise, random walk, Lorenz, etc.)
+    ├── test_hurst.py             # vs nolds
+    ├── test_permutation_entropy.py  # vs ordpy
+    ├── test_sample_entropy.py    # vs nolds
+    ├── test_lyapunov.py          # vs nolds
+    ├── test_optimal_delay.py     # analytical
+    ├── test_eigendecomposition.py # vs numpy
+    ├── test_kurtosis.py          # vs scipy
+    ├── test_spectral.py          # vs scipy
+    ├── test_spectral_profile.py  # vs scipy
+    ├── test_acf.py               # vs statsmodels
+    ├── test_acf_half_life.py     # analytical + AR(1)
+    ├── test_adf.py               # vs statsmodels
+    ├── test_arch.py              # vs statsmodels
+    ├── test_granger.py           # analytical
+    ├── test_turning_point_ratio.py  # analytical (E[TPR]=2/3)
+    ├── test_determinism.py       # analytical + pipeline match
+    └── test_continuity.py        # analytical
 ```
 
 ### Rust-accelerated primitives (Tier 1)
@@ -144,7 +164,7 @@ primitives/
 | time_delay_embedding | ✅ | ✅ | ✅ |
 | optimal_dimension | ✅ | ✅ | ✅ exact |
 
-All other ~100 primitives are Python-only.
+All other ~270 primitives are Python-only.
 
 ---
 
@@ -156,9 +176,13 @@ from primitives import hurst_exponent, BACKEND
 
 # Category imports (always Python)
 from primitives.individual.statistics import kurtosis
-from primitives.individual.spectral import spectral_entropy
+from primitives.individual.spectral import spectral_entropy, spectral_profile
+from primitives.individual.acf import acf_half_life
+from primitives.individual.temporal import turning_point_ratio
+from primitives.individual.continuity import continuity_features
 from primitives.pairwise.causality import granger_causality
-from primitives.dynamical.rqa import recurrence_rate
+from primitives.dynamical.rqa import recurrence_rate, determinism_from_signal
+from primitives.stat_tests.volatility import arch_test
 from primitives.matrix.decomposition import eigendecomposition
 from primitives.information.entropy import shannon_entropy
 from primitives.network.centrality import centrality_betweenness
@@ -177,7 +201,7 @@ from primitives.dynamics import lyapunov_rosenstein
 ```toml
 [package]
 name = "primitives"
-version = "0.1.0"
+version = "0.3.0"
 edition = "2021"
 
 [lib]
@@ -285,13 +309,23 @@ Before modifying any file:
 
 ```bash
 cd ~/primitives
-python -m pytest tests/ -v
+python -m pytest tests/ -v          # 58 unit tests
+python -m pytest validation/ -v     # 90 ground-truth validation tests
 ```
 
 ### Parity test suite
 
 `tests/test_rust_python_parity.py` tests every Rust primitive against its Python
 fallback on 5 signal types (random walk, white noise, trending, periodic, short).
+
+### Validation suite
+
+`validation/` tests primitives against reference libraries (nolds, ordpy, scipy,
+statsmodels) and known analytical solutions. Requires extra deps:
+
+```bash
+pip install nolds antropy ordpy statsmodels
+```
 
 ### Manual parity check
 
