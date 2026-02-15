@@ -388,6 +388,55 @@ def divergence_rqa(
     return 1.0 / L_max
 
 
+def determinism_from_signal(
+    signal: np.ndarray,
+    dimension: int = 3,
+    delay: int = 1,
+    threshold: float = None,
+    threshold_percentile: float = 10.0,
+    min_line: int = 2,
+    max_samples: int = 20000
+) -> float:
+    """
+    Compute determinism directly from a raw time series.
+
+    Convenience wrapper: embeds the signal, builds the recurrence matrix,
+    and returns the determinism measure.
+
+    Parameters
+    ----------
+    signal : np.ndarray
+        1D time series
+    dimension : int
+        Embedding dimension
+    delay : int
+        Time delay
+    threshold : float, optional
+        Recurrence threshold (if None, use percentile)
+    threshold_percentile : float
+        Percentile of distances for auto threshold
+    min_line : int
+        Minimum diagonal line length
+    max_samples : int
+        Maximum samples (longer signals are downsampled)
+
+    Returns
+    -------
+    float
+        Determinism in [0, 1]
+    """
+    signal = np.asarray(signal).flatten()
+
+    if len(signal) > max_samples:
+        step = len(signal) // max_samples
+        signal = signal[::step][:max_samples]
+
+    R = recurrence_matrix(
+        signal, dimension, delay, threshold, threshold_percentile
+    )
+    return determinism(R, min_line)
+
+
 def rqa_metrics(
     signal: np.ndarray,
     dimension: int = 3,
