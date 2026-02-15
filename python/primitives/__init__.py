@@ -7,6 +7,11 @@ No circular dependencies.
 Usage:
     from primitives import hurst_exponent, permutation_entropy
     from primitives import optimal_delay, lyapunov_rosenstein
+
+    # Or import by category:
+    from primitives.individual.statistics import mean, std
+    from primitives.dynamical.lyapunov import lyapunov_spectrum
+    from primitives.stat_tests.hypothesis import t_test
 """
 import os
 
@@ -51,7 +56,19 @@ if not _USE_RUST:
     )
     BACKEND = "python"
 
+# Subpackages (lazy — imported on access, not at startup)
+from primitives import individual  # noqa: F401
+from primitives import pairwise  # noqa: F401
+from primitives import dynamical  # noqa: F401
+from primitives import matrix  # noqa: F401
+from primitives import embedding  # noqa: F401
+from primitives import information  # noqa: F401
+from primitives import network  # noqa: F401
+from primitives import topology  # noqa: F401
+from primitives import stat_tests  # noqa: F401
+
 __all__ = [
+    # Tier 1 Rust-accelerated (top-level convenience exports)
     "hurst_exponent",
     "permutation_entropy",
     "sample_entropy",
@@ -63,4 +80,14 @@ __all__ = [
     "time_delay_embedding",
     "optimal_dimension",
     "BACKEND",
+    # Subpackages
+    "individual",
+    "pairwise",
+    "dynamical",
+    "matrix",
+    "embedding",
+    "information",
+    "network",
+    "topology",
+    "stat_tests",
 ]
