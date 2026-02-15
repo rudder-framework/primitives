@@ -293,3 +293,120 @@ def wavelet_coeffs(
         cD = np.real(np.fft.ifft(high_freq))
 
         return [cA, cD]
+
+
+def spectral_profile(data: np.ndarray, fs: float = 1.0, fft_size: int = None) -> dict:
+    """
+    Compute all spectral measures from a single FFT.
+
+    One FFT, all measures. This is what Prime calls for typology_raw.
+
+    Args:
+        data: 1-D signal array
+        fs: Sampling frequency (Hz). Default 1.0 (normalized).
+        fft_size: FFT length. Default None (use signal length).
+
+    Returns:
+        dict with keys:
+            spectral_flatness: float
+            spectral_slope: float
+            spectral_peak_snr: float
+            dominant_frequency: float
+            harmonic_noise_ratio: float
+            spectral_entropy: float
+            spectral_centroid: float
+            spectral_rolloff: float
+            is_first_bin_peak: bool
+
+    Insufficient data -> all NaN.
+    """
+    data = np.asarray(data, dtype=float).ravel()
+    n = len(data)
+
+    nan_result = {
+        'spectral_flatness': np.nan,
+        'spectral_slope': np.nan,
+        'spectral_peak_snr': np.nan,
+        'dominant_frequency': np.nan,
+        'harmonic_noise_ratio': np.nan,
+        'spectral_entropy': np.nan,
+        'spectral_centroid': np.nan,
+        'spectral_rolloff': np.nan,
+        'is_first_bin_peak': False,
+    }
+
+    if n < 8:
+        return nan_result
+
+    # --- Single FFT ---
+    if fft_size is None:
+        fft_size = n
+    windowed = data - np.mean(data)
+    fft_vals = np.fft.rfft(windowed, n=fft_size)
+    power = np.abs(fft_vals) ** 2
+    freqs = np.fft.rfftfreq(fft_size, 1.0 / fs)
+
+    total_power = np.sum(power)
+    if total_power < 1e-20:
+        return nan_result
+
+    # --- Dominant frequency ---
+    peak_idx = np.argmax(power)
+    dominant_freq = float(freqs[peak_idx])
+    is_first_bin_peak = bool(peak_idx <= 1)
+
+    # --- Spectral flatness (geometric mean / arithmetic mean) ---
+    power_pos = power[power > 0]
+    if len(power_pos) > 0:
+        log_mean = np.mean(np.log(power_pos))
+        geo_mean = np.exp(log_mean)
+        arith_mean = np.mean(power_pos)
+        sf = float(geo_mean / arith_mean) if arith_mean > 0 else np.nan
+    else:
+        sf = np.nan
+
+    # --- Spectral slope (log-log regression) ---
+    pos_mask = (freqs > 0) & (power > 0)
+    if np.sum(pos_mask) > 2:
+        log_f = np.log10(freqs[pos_mask])
+        log_p = np.log10(power[pos_mask])
+        coeffs = np.polyfit(log_f, log_p, 1)
+        slope = float(coeffs[0])
+    else:
+        slope = np.nan
+
+    # --- Spectral peak SNR (dB above median) ---
+    median_power = np.median(power[power > 0]) if np.any(power > 0) else 1e-20
+    peak_power = power[peak_idx]
+    snr = float(10 * np.log10(peak_power / median_power)) if median_power > 0 else np.nan
+
+    # --- Harmonic noise ratio ---
+    non_peak_power = total_power - peak_power
+    hnr = float(peak_power / non_peak_power) if non_peak_power > 0 else np.nan
+
+    # --- Spectral entropy ---
+    p_norm = power / total_power
+    p_pos = p_norm[p_norm > 0]
+    entropy = -np.sum(p_pos * np.log2(p_pos))
+    max_entropy = np.log2(len(power))
+    se = float(entropy / max_entropy) if max_entropy > 0 else 0.0
+
+    # --- Spectral centroid ---
+    sc = float(np.sum(freqs * power) / total_power)
+
+    # --- Spectral rolloff (85% cumulative power) ---
+    cumsum = np.cumsum(power) / total_power
+    rolloff_idx = np.searchsorted(cumsum, 0.85)
+    sr = float(freqs[min(rolloff_idx, len(freqs) - 1)])
+
+    return {
+        'spectral_flatness': sf,
+        'spectral_slope': slope,
+        'spectral_peak_snr': snr,
+        'dominant_frequency': dominant_freq,
+        'harmonic_noise_ratio': hnr,
+        'spectral_entropy': se,
+        'spectral_centroid': sc,
+        'spectral_rolloff': sr,
+        'is_first_bin_peak': is_first_bin_peak,
+    }
