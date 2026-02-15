@@ -15,9 +15,9 @@ from primitives.config import PRIMITIVES_CONFIG as cfg
 def lyapunov_exponent(
     values: np.ndarray,
     embed_dim: int = 3,
-    tau: int = 1,
-    min_separation: Optional[int] = None,
-    max_steps: Optional[int] = None
+    tau: int = None,
+    min_separation: int = None,
+    max_steps: int = None
 ) -> float:
     """
     Estimate largest Lyapunov exponent using Rosenstein's method.
@@ -28,64 +28,90 @@ def lyapunov_exponent(
 
     Args:
         values: Input time series
-        embed_dim: Embedding dimension
-        tau: Time delay for embedding
-        min_separation: Minimum separation between neighbors
-        max_steps: Maximum divergence steps to track
+        embed_dim: Embedding dimension (default: 3)
+        tau: Time delay for embedding (default: n // 100)
+        min_separation: Minimum temporal separation between neighbors
+                        (default: mean period via FFT, capped at n//4)
+        max_steps: Divergence trajectory length (default: min(n//10, 500))
 
     Returns:
         Largest Lyapunov exponent
     """
+    from scipy.spatial import KDTree
+
     values = np.asarray(values, dtype=np.float64)
     n = len(values)
 
-    if min_separation is None:
-        min_separation = cfg.dynamics.min_separation
+    if n < 50:
+        return np.nan
+
+    # Estimate characteristic period from FFT (for tau, min_separation)
+    period = _auto_min_tsep(values)
+
+    # Default max_steps: moderate trajectory length for slope fitting
     if max_steps is None:
-        max_steps = cfg.dynamics.max_steps
+        max_steps = min(max(10, period // 4), 200)
+
+    # Default tau: ~1/10 of characteristic period
+    if tau is None:
+        tau = max(1, period // 10)
 
     # Embed the time series
     n_vectors = n - (embed_dim - 1) * tau
-    if n_vectors < 2 * min_separation:
+    if n_vectors < 2 * max_steps:
         return np.nan
 
-    embedded = np.array([
-        values[i:i + embed_dim * tau:tau]
-        for i in range(n_vectors)
-    ])
+    embedded = np.zeros((n_vectors, embed_dim))
+    for d in range(embed_dim):
+        embedded[:, d] = values[d * tau : d * tau + n_vectors]
 
-    # Find nearest neighbors (excluding temporal neighbors)
-    distances = squareform(pdist(embedded))
+    # Auto-detect minimum temporal separation from mean period
+    if min_separation is None:
+        min_separation = min(period, n_vectors // 4)
 
-    # Set temporal neighbors to infinity
-    for i in range(len(distances)):
-        for j in range(max(0, i - min_separation), min(len(distances), i + min_separation + 1)):
-            distances[i, j] = np.inf
-
-    # Find nearest neighbor for each point
-    nearest = np.argmin(distances, axis=1)
-
-    # Track divergence
-    divergences = []
-    for step in range(1, min(max_steps, n_vectors - max(nearest) - 1)):
-        step_divergences = []
-        for i in range(len(nearest)):
-            j = nearest[i]
-            if i + step < n_vectors and j + step < n_vectors:
-                d0 = distances[i, j]
-                d1 = np.linalg.norm(embedded[i + step] - embedded[j + step])
-                if d0 > 0 and d1 > 0:
-                    step_divergences.append(np.log(d1 / d0))
-
-        if len(step_divergences) > 0:
-            divergences.append(np.mean(step_divergences))
-
-    if len(divergences) < 2:
+    # Only use vectors that can be followed for full max_steps trajectory
+    ntraj = n_vectors - max_steps
+    if ntraj < 2 * min_separation + 2:
         return np.nan
 
-    # Fit line to estimate Lyapunov exponent
-    steps = np.arange(1, len(divergences) + 1)
-    slope, _ = np.polyfit(steps, divergences, 1)
+    # Find nearest neighbors using KDTree (O(n log n), not O(n^2))
+    tree = KDTree(embedded[:ntraj])
+    k_query = min(2 * min_separation + 10, ntraj)
+    dists_all, indices_all = tree.query(embedded[:ntraj], k=k_query)
+
+    # For each point, find nearest neighbor outside temporal exclusion zone
+    nn_idx = np.full(ntraj, -1, dtype=int)
+    for i in range(ntraj):
+        for ki in range(1, dists_all.shape[1]):  # skip k=0 (self)
+            j = indices_all[i, ki]
+            if abs(i - j) >= min_separation:
+                nn_idx[i] = j
+                break
+
+    valid_mask = nn_idx >= 0
+    valid_i = np.where(valid_mask)[0]
+    valid_j = nn_idx[valid_i]
+
+    if len(valid_i) < 10:
+        return np.nan
+
+    # Build mean divergence trajectory (vectorized)
+    # Rosenstein: d'(k) = mean(log(dist(X_{i+k}, X_{nn(i)+k})))
+    div_traj = np.full(max_steps, np.nan)
+    for k in range(max_steps):
+        diffs = embedded[valid_i + k] - embedded[valid_j + k]
+        dists_k = np.linalg.norm(diffs, axis=1)
+        nonzero = dists_k > 0
+        if np.any(nonzero):
+            div_traj[k] = np.mean(np.log(dists_k[nonzero]))
+
+    # Fit line: log(divergence) = lambda * k + const
+    ks = np.arange(max_steps)
+    finite = np.isfinite(div_traj)
+    if np.sum(finite) < 2:
+        return np.nan
+
+    slope, _ = np.polyfit(ks[finite], div_traj[finite], 1)
 
     return float(slope)
 
@@ -423,3 +449,26 @@ def poincare_map(
             raise ValueError(f"Unknown direction: {direction}")
 
     return np.array(crossings)
+
+
+def _auto_min_tsep(values: np.ndarray) -> int:
+    """Auto-detect minimum temporal separation from mean period.
+
+    Uses FFT to estimate the mean frequency, then returns
+    the mean period (1 / mean_freq) as the minimum temporal
+    separation. Follows the same approach as nolds.
+    """
+    n = len(values)
+    f = np.fft.rfft(values, n * 2 - 1)
+    freqs = np.fft.rfftfreq(n * 2 - 1)
+    psd = np.abs(f) ** 2
+
+    total_power = np.sum(psd[1:])
+    if total_power == 0:
+        return max(1, n // 10)
+
+    mean_freq = np.sum(freqs[1:] * psd[1:]) / total_power
+    if mean_freq <= 0:
+        return max(1, n // 10)
+
+    return max(1, int(np.ceil(1.0 / mean_freq)))

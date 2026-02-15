@@ -61,7 +61,7 @@ def hurst_exponent(
         return dfa(signal)
 
     # Rescaled Range (R/S) method
-    max_k = min(int(n * cfg.fractal.rs_max_k_ratio), cfg.fractal.rs_max_k_cap)
+    max_k = min(int(n * cfg.fractal.rs_max_k_ratio), n // 4)
     k_values = []
     rs_values = []
 
@@ -216,7 +216,7 @@ def hurst_r2(signal: np.ndarray) -> float:
     if n < cfg.fractal.rs_min_k:
         return np.nan
 
-    max_k = min(int(n * cfg.fractal.rs_max_k_ratio), cfg.fractal.rs_max_k_cap)
+    max_k = min(int(n * cfg.fractal.rs_max_k_ratio), n // 4)
     log_k = []
     log_rs = []
 
