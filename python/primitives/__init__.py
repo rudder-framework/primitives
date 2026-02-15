@@ -44,7 +44,7 @@ if not _USE_RUST:
         ftle_local_linearization,
         ftle_direct_perturbation,
     )
-    from primitives.embedding import (
+    from primitives.embedding.delay import (
         optimal_delay,
         time_delay_embedding,
         optimal_dimension,
