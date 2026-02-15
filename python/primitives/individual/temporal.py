@@ -316,3 +316,34 @@ def segment_signal(
     ])
 
     return windows
+
+
+def turning_point_ratio(data: np.ndarray) -> float:
+    """
+    Fraction of points that are local extrema (turning points).
+
+    A turning point at index i means:
+        data[i-1] < data[i] > data[i+1]  (local max)
+        OR data[i-1] > data[i] < data[i+1]  (local min)
+
+    Expected value for white noise: 2/3 ~ 0.667.
+    Low TPR -> trending or smooth. High TPR -> oscillatory or noisy.
+
+    Args:
+        data: 1-D signal array
+
+    Returns:
+        float in [0, 1]. NaN if len(data) < 3.
+    """
+    data = np.asarray(data, dtype=float).ravel()
+    n = len(data)
+    if n < 3:
+        return np.nan
+
+    count = 0
+    for i in range(1, n - 1):
+        if (data[i] > data[i-1] and data[i] > data[i+1]) or \
+           (data[i] < data[i-1] and data[i] < data[i+1]):
+            count += 1
+
+    return float(count) / (n - 2)
