@@ -56,6 +56,9 @@ if not _USE_RUST:
     )
     BACKEND = "python"
 
+# lyapunov_exponent: always Python (Rust not yet ported to match fixed defaults)
+from primitives.individual.dynamics import lyapunov_exponent  # noqa: E402
+
 # Subpackages (lazy — imported on access, not at startup)
 from primitives import individual  # noqa: F401
 from primitives import pairwise  # noqa: F401
@@ -79,6 +82,7 @@ __all__ = [
     "optimal_delay",
     "time_delay_embedding",
     "optimal_dimension",
+    "lyapunov_exponent",
     "BACKEND",
     # Subpackages
     "individual",
