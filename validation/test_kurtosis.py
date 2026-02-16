@@ -13,7 +13,7 @@ import pytest
 
 from scipy.stats import kurtosis as scipy_kurtosis
 
-from prmtvs.individual.statistics import kurtosis
+from pmtvs.individual.statistics import kurtosis
 
 
 class TestKurtosisVsScipy:

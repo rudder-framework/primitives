@@ -11,7 +11,7 @@ Reference: nolds.lyap_r() (Rosenstein method)
 import numpy as np
 import pytest
 
-from prmtvs import lyapunov_rosenstein
+from pmtvs import lyapunov_rosenstein
 
 import nolds
 

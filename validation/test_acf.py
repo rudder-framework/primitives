@@ -13,7 +13,7 @@ import pytest
 
 from statsmodels.tsa.stattools import acf as sm_acf
 
-from prmtvs.individual.correlation import autocorrelation
+from pmtvs.individual.correlation import autocorrelation
 
 
 class TestACFVsStatsmodels:

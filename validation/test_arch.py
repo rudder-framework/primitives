@@ -11,7 +11,7 @@ class TestArchVsStatsmodels:
 
     def test_garch_process(self):
         """Simulated GARCH(1,1): should detect ARCH effects."""
-        from prmtvs.stat_tests.volatility import arch_test
+        from pmtvs.stat_tests.volatility import arch_test
         from statsmodels.stats.diagnostic import het_arch
 
         rng = np.random.RandomState(42)
@@ -31,7 +31,7 @@ class TestArchVsStatsmodels:
 
     def test_white_noise_no_arch(self):
         """White noise: no ARCH effects."""
-        from prmtvs.stat_tests.volatility import arch_test
+        from pmtvs.stat_tests.volatility import arch_test
 
         rng = np.random.RandomState(42)
         y = rng.randn(2000)
@@ -43,11 +43,11 @@ class TestArchVsStatsmodels:
 class TestArchAnalytical:
 
     def test_constant_no_arch(self):
-        from prmtvs.stat_tests.volatility import arch_test
+        from pmtvs.stat_tests.volatility import arch_test
         result = arch_test(np.ones(500))
         assert result['pvalue'] > 0.05 or np.isnan(result['pvalue'])
 
     def test_short_signal(self):
-        from prmtvs.stat_tests.volatility import arch_test
+        from pmtvs.stat_tests.volatility import arch_test
         result = arch_test(np.array([1.0, 2.0, 3.0]))
         assert np.isnan(result['statistic'])

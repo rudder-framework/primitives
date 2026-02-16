@@ -11,7 +11,7 @@ Reference: nolds.hurst_rs()
 import numpy as np
 import pytest
 
-from prmtvs import hurst_exponent
+from pmtvs import hurst_exponent
 
 import nolds
 
