@@ -1,10 +1,10 @@
 [package]
-name = "primitives"
+name = "prmtvs"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "primitives"
+name = "prmtvs"
 crate-type = ["cdylib"]
 
 [dependencies]

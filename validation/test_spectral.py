@@ -13,7 +13,7 @@ import pytest
 
 from scipy.signal import welch as scipy_welch
 
-from primitives.individual.spectral import psd, dominant_frequency, spectral_entropy
+from prmtvs.individual.spectral import psd, dominant_frequency, spectral_entropy
 
 
 class TestSpectralVsScipy:

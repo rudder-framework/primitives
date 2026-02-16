@@ -18,22 +18,22 @@ SIGNALS = {
 
 # (func_name, rust_module, python_module, kwargs)
 SCALAR_PAIRS = [
-    ("hurst_exponent", "primitives._rust", "primitives.individual.fractal", {}),
-    ("hurst_exponent", "primitives._rust", "primitives.individual.fractal", {"method": "dfa"}),
-    ("permutation_entropy", "primitives._rust", "primitives.individual.entropy", {}),
-    ("sample_entropy", "primitives._rust", "primitives.individual.entropy", {}),
+    ("hurst_exponent", "prmtvs._rust", "prmtvs.individual.fractal", {}),
+    ("hurst_exponent", "prmtvs._rust", "prmtvs.individual.fractal", {"method": "dfa"}),
+    ("permutation_entropy", "prmtvs._rust", "prmtvs.individual.entropy", {}),
+    ("sample_entropy", "prmtvs._rust", "prmtvs.individual.entropy", {}),
 ]
 
 # Functions that return tuples — compare element by element
 TUPLE_PAIRS = [
-    ("lyapunov_rosenstein", "primitives._rust", "primitives.dynamical.lyapunov", {}),
-    ("lyapunov_kantz", "primitives._rust", "primitives.dynamical.lyapunov", {}),
+    ("lyapunov_rosenstein", "prmtvs._rust", "prmtvs.dynamical.lyapunov", {}),
+    ("lyapunov_kantz", "prmtvs._rust", "prmtvs.dynamical.lyapunov", {}),
 ]
 
 # Functions that return int
 INT_PAIRS = [
-    ("optimal_delay", "primitives._rust", "primitives.embedding.delay", {}),
-    ("optimal_dimension", "primitives._rust", "primitives.embedding.delay", {}),
+    ("optimal_delay", "prmtvs._rust", "prmtvs.embedding.delay", {}),
+    ("optimal_dimension", "prmtvs._rust", "prmtvs.embedding.delay", {}),
 ]
 
 

@@ -14,14 +14,14 @@ class TestACFHalfLifeVsStatsmodels:
     """Verify ACF computation matches statsmodels."""
 
     def test_white_noise(self):
-        from primitives.individual.acf import acf_half_life
+        from prmtvs.individual.acf import acf_half_life
         rng = np.random.RandomState(42)
         hl = acf_half_life(rng.randn(10000))
         assert hl <= 3, f"White noise half-life should be ~1, got {hl}"
 
     def test_ar1_process(self):
         """AR(1) with phi=0.9: theoretical half-life ~ 6.6 at threshold 0.5."""
-        from primitives.individual.acf import acf_half_life
+        from prmtvs.individual.acf import acf_half_life
         rng = np.random.RandomState(42)
         phi = 0.9
         n = 10000
@@ -38,18 +38,18 @@ class TestACFHalfLifeVsStatsmodels:
 class TestACFHalfLifeAnalytical:
 
     def test_constant_max_lag(self):
-        from primitives.individual.acf import acf_half_life
+        from prmtvs.individual.acf import acf_half_life
         hl = acf_half_life(np.ones(1000))
         assert hl == 100  # max_lag = min(n//4, 100) = 100
 
     def test_short_signal_nan(self):
-        from primitives.individual.acf import acf_half_life
+        from prmtvs.individual.acf import acf_half_life
         hl = acf_half_life(np.array([1.0, 2.0]))
         assert np.isnan(hl)
 
     def test_threshold_parameter(self):
         """Lower threshold = higher half-life for same signal."""
-        from primitives.individual.acf import acf_half_life
+        from prmtvs.individual.acf import acf_half_life
         rng = np.random.RandomState(42)
         phi = 0.9
         n = 10000

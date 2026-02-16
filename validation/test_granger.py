@@ -10,7 +10,7 @@ Known values:
 import numpy as np
 import pytest
 
-from primitives.pairwise.causality import granger_causality
+from prmtvs.pairwise.causality import granger_causality
 
 
 class TestGrangerAnalytical:
