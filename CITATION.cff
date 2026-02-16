@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "pmtvs: Signal Analysis Primitives"
+authors:
+  - family-names: Rudder
+    given-names: Jason
+version: 0.2.0
+date-released: 2026-02-16
+url: "https://github.com/rudder-framework/primitives"
+repository-code: "https://github.com/rudder-framework/primitives"
+license: MIT
+keywords:
+  - signal-processing
+  - dynamical-systems
+  - lyapunov-exponent
+  - hurst-exponent
+  - ftle
+  - recurrence-quantification
+  - permutation-entropy
+  - nonlinear-dynamics
+  - rust
+  - python

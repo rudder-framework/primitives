@@ -13,6 +13,8 @@ Usage:
     from pmtvs.dynamical.lyapunov import lyapunov_spectrum
     from pmtvs.stat_tests.hypothesis import t_test
 """
+__version__ = "0.2.0"
+
 import os
 
 _USE_RUST = os.environ.get("PMTVS_USE_RUST", "1") != "0"
