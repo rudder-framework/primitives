@@ -1,9 +1,12 @@
 # pmtvs
 
 281 pure math functions for signal analysis and dynamical systems. Rust-accelerated. numpy in, scalars out.
-```python
-pip install pmtvs
 
+```bash
+pip install pmtvs
+```
+
+```python
 from pmtvs import lyapunov_exponent, hurst_exponent, permutation_entropy, BACKEND
 
 le = lyapunov_exponent(signal)  # chaos detection
