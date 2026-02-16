@@ -23,7 +23,16 @@
       "Bash(git -C /Users/jasonrudder/primitives push)",
       "Bash(wc:*)",
       "Bash(git -C /Users/jasonrudder/primitives diff --stat)",
-      "Bash(git -C /Users/jasonrudder/primitives push -u origin rename-to-prmtvs)"
+      "Bash(git -C /Users/jasonrudder/primitives push -u origin rename-to-prmtvs)",
+      "Bash(git -C /Users/jasonrudder/primitives checkout main)",
+      "Bash(git -C /Users/jasonrudder/primitives merge rename-to-prmtvs)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh workflow run:*)",
+      "Bash(gh run watch:*)",
+      "Bash(git stash:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash pop:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
