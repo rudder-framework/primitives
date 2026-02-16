@@ -11,7 +11,7 @@ Known values:
 import numpy as np
 import pytest
 
-from prmtvs.matrix.decomposition import eigendecomposition
+from pmtvs.matrix.decomposition import eigendecomposition
 
 
 class TestEigenVsNumpy:

@@ -11,7 +11,7 @@ Reference: nolds.sampen()
 import numpy as np
 import pytest
 
-from prmtvs import sample_entropy
+from pmtvs import sample_entropy
 
 import nolds
 

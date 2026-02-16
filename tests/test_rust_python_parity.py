@@ -18,22 +18,22 @@ SIGNALS = {
 
 # (func_name, rust_module, python_module, kwargs)
 SCALAR_PAIRS = [
-    ("hurst_exponent", "prmtvs._rust", "prmtvs.individual.fractal", {}),
-    ("hurst_exponent", "prmtvs._rust", "prmtvs.individual.fractal", {"method": "dfa"}),
-    ("permutation_entropy", "prmtvs._rust", "prmtvs.individual.entropy", {}),
-    ("sample_entropy", "prmtvs._rust", "prmtvs.individual.entropy", {}),
+    ("hurst_exponent", "pmtvs._rust", "pmtvs.individual.fractal", {}),
+    ("hurst_exponent", "pmtvs._rust", "pmtvs.individual.fractal", {"method": "dfa"}),
+    ("permutation_entropy", "pmtvs._rust", "pmtvs.individual.entropy", {}),
+    ("sample_entropy", "pmtvs._rust", "pmtvs.individual.entropy", {}),
 ]
 
 # Functions that return tuples — compare element by element
 TUPLE_PAIRS = [
-    ("lyapunov_rosenstein", "prmtvs._rust", "prmtvs.dynamical.lyapunov", {}),
-    ("lyapunov_kantz", "prmtvs._rust", "prmtvs.dynamical.lyapunov", {}),
+    ("lyapunov_rosenstein", "pmtvs._rust", "pmtvs.dynamical.lyapunov", {}),
+    ("lyapunov_kantz", "pmtvs._rust", "pmtvs.dynamical.lyapunov", {}),
 ]
 
 # Functions that return int
 INT_PAIRS = [
-    ("optimal_delay", "prmtvs._rust", "prmtvs.embedding.delay", {}),
-    ("optimal_dimension", "prmtvs._rust", "prmtvs.embedding.delay", {}),
+    ("optimal_delay", "pmtvs._rust", "pmtvs.embedding.delay", {}),
+    ("optimal_dimension", "pmtvs._rust", "pmtvs.embedding.delay", {}),
 ]
 
 
