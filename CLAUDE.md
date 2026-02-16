@@ -1,9 +1,9 @@
-# CLAUDE.md — Primitives
+# CLAUDE.md — prmtvs
 
-Primitives is a Rust+Python library of 281 pure mathematical functions
+prmtvs is a Rust+Python library of 281 pure mathematical functions
 for signal analysis and dynamical systems. Arrays in, numbers out. Nothing else.
 
-**Primitives is a calculator.** You hand it numbers, it hands numbers back.
+**prmtvs is a calculator.** You hand it numbers, it hands numbers back.
 It has no idea where the numbers came from. It never sees a file, a DataFrame,
 a signal_id, a cohort, or a config object.
 
@@ -19,24 +19,24 @@ rudder-framework/manifold      → compute engine (pipeline, parquet I/O)
 rudder-framework/prime         → interpreter (classification, SQL, explorer)
 ```
 
-Primitives is the **leaf dependency**. It depends on nothing.
+prmtvs is the **leaf dependency**. It depends on nothing.
 Both Prime and Manifold depend on it. Neither owns it.
 
 ```
-primitives   ← THIS REPO (no dependencies on Prime or Manifold)
+prmtvs   ← THIS REPO (no dependencies on Prime or Manifold)
    ↑    ↑
    |    |
 Prime  Manifold
 ```
 
-### How each consumer uses primitives
+### How each consumer uses prmtvs
 
 ```python
-# Prime calls primitives ONCE per signal (typology):
-primitives.hurst_exponent(entire_signal)     → "what kind of signal is this?"
+# Prime calls prmtvs ONCE per signal (typology):
+prmtvs.hurst_exponent(entire_signal)     → "what kind of signal is this?"
 
-# Manifold calls primitives PER WINDOW per signal (thousands of times):
-primitives.hurst_exponent(window_of_signal)  → "how is this signal changing?"
+# Manifold calls prmtvs PER WINDOW per signal (thousands of times):
+prmtvs.hurst_exponent(window_of_signal)  → "how is this signal changing?"
 ```
 
 Same function. Different scale. Same result.
@@ -62,20 +62,20 @@ pip install maturin
 maturin develop --release
 ```
 
-This compiles the Rust code and makes `primitives` importable in Python immediately.
+This compiles the Rust code and makes `prmtvs` importable in Python immediately.
 
 ### Verify
 
 ```bash
-python -c "from primitives import hurst_exponent; print('OK')"
-python -c "from primitives import BACKEND; print(f'Backend: {BACKEND}')"
+python -c "from prmtvs import hurst_exponent; print('OK')"
+python -c "from prmtvs import BACKEND; print(f'Backend: {BACKEND}')"
 ```
 
 ### Build wheels for distribution
 
 ```bash
 maturin build --release
-# Output: target/wheels/primitives-*.whl
+# Output: target/wheels/prmtvs-*.whl
 ```
 
 ---
@@ -103,8 +103,8 @@ primitives/
 │       └── delay.rs              # optimal_delay, time_delay_embedding, optimal_dimension
 │
 ├── python/                       # Python implementations (all 281 primitives)
-│   └── primitives/
-│       ├── __init__.py           # PRIMITIVES_USE_RUST toggle, re-exports
+│   └── prmtvs/
+│       ├── __init__.py           # PRMTVS_USE_RUST toggle, re-exports
 │       ├── _config.py            # USE_RUST env var reader
 │       ├── config.py             # Centralized default parameters
 │       ├── complexity.py         # Backward compat (original flat file)
@@ -172,26 +172,26 @@ All other ~270 primitives are Python-only.
 
 ```python
 # Top-level (Rust-accelerated when available)
-from primitives import hurst_exponent, BACKEND
+from prmtvs import hurst_exponent, BACKEND
 
 # Category imports (always Python)
-from primitives.individual.statistics import kurtosis
-from primitives.individual.spectral import spectral_entropy, spectral_profile
-from primitives.individual.acf import acf_half_life
-from primitives.individual.temporal import turning_point_ratio
-from primitives.individual.continuity import continuity_features
-from primitives.pairwise.causality import granger_causality
-from primitives.dynamical.rqa import recurrence_rate, determinism_from_signal
-from primitives.stat_tests.volatility import arch_test
-from primitives.matrix.decomposition import eigendecomposition
-from primitives.information.entropy import shannon_entropy
-from primitives.network.centrality import centrality_betweenness
-from primitives.topology.persistence import betti_numbers
-from primitives.stat_tests.stationarity_tests import adf_test
+from prmtvs.individual.statistics import kurtosis
+from prmtvs.individual.spectral import spectral_entropy, spectral_profile
+from prmtvs.individual.acf import acf_half_life
+from prmtvs.individual.temporal import turning_point_ratio
+from prmtvs.individual.continuity import continuity_features
+from prmtvs.pairwise.causality import granger_causality
+from prmtvs.dynamical.rqa import recurrence_rate, determinism_from_signal
+from prmtvs.stat_tests.volatility import arch_test
+from prmtvs.matrix.decomposition import eigendecomposition
+from prmtvs.information.entropy import shannon_entropy
+from prmtvs.network.centrality import centrality_betweenness
+from prmtvs.topology.persistence import betti_numbers
+from prmtvs.stat_tests.stationarity_tests import adf_test
 
 # Backward compat (still works)
-from primitives.complexity import hurst_exponent
-from primitives.dynamics import lyapunov_rosenstein
+from prmtvs.complexity import hurst_exponent
+from prmtvs.dynamics import lyapunov_rosenstein
 ```
 
 ---
@@ -200,12 +200,12 @@ from primitives.dynamics import lyapunov_rosenstein
 
 ```toml
 [package]
-name = "primitives"
+name = "prmtvs"
 version = "0.3.0"
 edition = "2021"
 
 [lib]
-name = "primitives"
+name = "prmtvs"
 crate-type = ["cdylib"]
 
 [dependencies]
@@ -243,15 +243,15 @@ If a function needs to know about files or pipelines, it does not belong here.
 
 ## Rust / Python Toggle
 
-Environment variable: `PRIMITIVES_USE_RUST`
+Environment variable: `PRMTVS_USE_RUST`
 
 ```bash
 # Rust backend (default — fast)
-python -c "from primitives import BACKEND; print(BACKEND)"
+python -c "from prmtvs import BACKEND; print(BACKEND)"
 # → "rust"
 
 # Python fallback (debugging, or Rust not installed)
-PRIMITIVES_USE_RUST=0 python -c "from primitives import BACKEND; print(BACKEND)"
+PRMTVS_USE_RUST=0 python -c "from prmtvs import BACKEND; print(BACKEND)"
 # → "python"
 ```
 
@@ -259,7 +259,7 @@ The toggle is read ONCE at import time. Both Prime and Manifold get the same
 backend from the same env var.
 
 Individual Python modules also check `_config.USE_RUST` for per-function
-Rust acceleration when calling directly (e.g. `from primitives.individual.fractal import hurst_exponent`).
+Rust acceleration when calling directly (e.g. `from prmtvs.individual.fractal import hurst_exponent`).
 
 ---
 
@@ -331,8 +331,8 @@ pip install nolds antropy ordpy statsmodels
 
 ```python
 import numpy as np
-from primitives._rust import hurst_exponent as rs_hurst
-from primitives.individual.fractal import hurst_exponent as py_hurst
+from prmtvs._rust import hurst_exponent as rs_hurst
+from prmtvs.individual.fractal import hurst_exponent as py_hurst
 
 y = np.cumsum(np.random.RandomState(42).randn(500))
 diff = abs(rs_hurst(y) - py_hurst(y))

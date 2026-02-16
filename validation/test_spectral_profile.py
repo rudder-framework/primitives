@@ -14,7 +14,7 @@ class TestSpectralProfileVsScipy:
 
     def test_dominant_frequency_sine(self):
         """Pure 5 Hz sine: dominant frequency = 5 Hz."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         fs = 1000
         t = np.arange(10000) / fs
         signal = np.sin(2 * np.pi * 5.0 * t)
@@ -24,7 +24,7 @@ class TestSpectralProfileVsScipy:
 
     def test_flatness_white_noise(self):
         """White noise: spectral flatness near 1."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         rng = np.random.RandomState(42)
         result = spectral_profile(rng.randn(10000))
         assert result['spectral_flatness'] > 0.5, \
@@ -32,7 +32,7 @@ class TestSpectralProfileVsScipy:
 
     def test_flatness_sine(self):
         """Pure sine: spectral flatness near 0."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         t = np.linspace(0, 10, 10000)
         result = spectral_profile(np.sin(2 * np.pi * 5 * t))
         assert result['spectral_flatness'] < 0.1, \
@@ -40,7 +40,7 @@ class TestSpectralProfileVsScipy:
 
     def test_snr_sine_high(self):
         """Pure sine: high spectral peak SNR."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         t = np.linspace(0, 10, 10000)
         result = spectral_profile(np.sin(2 * np.pi * 5 * t))
         assert result['spectral_peak_snr'] > 20, \
@@ -48,7 +48,7 @@ class TestSpectralProfileVsScipy:
 
     def test_snr_white_noise_low(self):
         """White noise: low spectral peak SNR."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         rng = np.random.RandomState(42)
         result = spectral_profile(rng.randn(10000))
         assert result['spectral_peak_snr'] < 15, \
@@ -56,7 +56,7 @@ class TestSpectralProfileVsScipy:
 
     def test_entropy_white_noise_high(self):
         """White noise: high spectral entropy."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         rng = np.random.RandomState(42)
         result = spectral_profile(rng.randn(10000))
         assert result['spectral_entropy'] > 0.8, \
@@ -64,7 +64,7 @@ class TestSpectralProfileVsScipy:
 
     def test_entropy_sine_low(self):
         """Pure sine: low spectral entropy."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         t = np.linspace(0, 10, 10000)
         result = spectral_profile(np.sin(2 * np.pi * 5 * t))
         assert result['spectral_entropy'] < 0.3, \
@@ -72,13 +72,13 @@ class TestSpectralProfileVsScipy:
 
     def test_first_bin_detection(self):
         """DC-dominant signal should flag is_first_bin_peak."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         result = spectral_profile(np.linspace(0, 100, 1000))
         assert result['is_first_bin_peak'] is True
 
     def test_slope_red_noise(self):
         """1/f noise: negative spectral slope."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         rng = np.random.RandomState(42)
         red = np.cumsum(rng.randn(10000))
         result = spectral_profile(red)
@@ -87,12 +87,12 @@ class TestSpectralProfileVsScipy:
 
     def test_short_signal_nan(self):
         """Insufficient data returns NaN."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         result = spectral_profile(np.array([1.0, 2.0, 3.0]))
         assert np.isnan(result['spectral_flatness'])
 
     def test_constant_signal(self):
         """Constant signal: all measures handled gracefully."""
-        from primitives.individual.spectral import spectral_profile
+        from prmtvs.individual.spectral import spectral_profile
         result = spectral_profile(np.ones(1000))
         assert isinstance(result, dict)

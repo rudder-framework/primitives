@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(/bin/mkdir:*)",
+      "Bash(PRMTVS_USE_RUST=0 python:*)",
+      "Bash(python -c:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(maturin develop:*)",
+      "Bash(git status:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(ls:*)",
+      "Bash(git push:*)",
+      "Bash(pip install:*)",
+      "Bash(python3:*)",
+      "Bash(git tag:*)",
+      "Bash(find:*)",
+      "Bash(git -C /Users/jasonrudder/primitives status)",
+      "Bash(git -C /Users/jasonrudder/primitives diff python/primitives/individual/dynamics.py python/primitives/individual/fractal.py)",
+      "Bash(git -C /Users/jasonrudder/primitives log --oneline -5)",
+      "Bash(git -C /Users/jasonrudder/primitives push)",
+      "Bash(wc:*)",
+      "Bash(git -C /Users/jasonrudder/primitives diff --stat)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "motherduck"
+  ]
+}

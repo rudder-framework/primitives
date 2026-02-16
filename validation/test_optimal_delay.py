@@ -10,7 +10,7 @@ Reference: statsmodels ACF
 import numpy as np
 import pytest
 
-from primitives import optimal_delay
+from prmtvs import optimal_delay
 
 
 class TestOptimalDelayAnalytical:

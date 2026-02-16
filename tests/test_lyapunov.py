@@ -8,7 +8,7 @@ def test_returns_tuple():
     np.random.seed(42)
     signal = np.random.randn(200)
 
-    from primitives.dynamics import lyapunov_rosenstein
+    from prmtvs.dynamics import lyapunov_rosenstein
     result = lyapunov_rosenstein(signal)
     assert len(result) == 3
     lam, div, iters = result
@@ -17,7 +17,7 @@ def test_returns_tuple():
 
 def test_short_signal_returns_nan():
     """Signal too short returns NaN."""
-    from primitives.dynamics import lyapunov_rosenstein
+    from prmtvs.dynamics import lyapunov_rosenstein
     lam, _, _ = lyapunov_rosenstein(np.array([1.0, 2.0, 3.0]))
     assert np.isnan(lam)
 
@@ -26,7 +26,7 @@ def test_periodic_near_zero():
     """Periodic signal should have Lyapunov near zero or negative."""
     signal = np.sin(np.linspace(0, 40 * np.pi, 2000))
 
-    from primitives.dynamics import lyapunov_rosenstein
+    from prmtvs.dynamics import lyapunov_rosenstein
     lam, _, _ = lyapunov_rosenstein(signal, dimension=3, delay=5)
     # Periodic signals have non-positive Lyapunov
     if np.isfinite(lam):
@@ -38,7 +38,7 @@ def test_kantz_returns_tuple():
     np.random.seed(42)
     signal = np.random.randn(200)
 
-    from primitives.dynamics import lyapunov_kantz
+    from prmtvs.dynamics import lyapunov_kantz
     result = lyapunov_kantz(signal)
     assert len(result) == 2
     lam, div = result

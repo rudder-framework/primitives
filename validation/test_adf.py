@@ -12,7 +12,7 @@ import pytest
 
 from statsmodels.tsa.stattools import adfuller as sm_adfuller
 
-from primitives.stat_tests.stationarity_tests import adf_test
+from prmtvs.stat_tests.stationarity_tests import adf_test
 
 
 class TestADFVsStatsmodels:

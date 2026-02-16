@@ -10,7 +10,7 @@ Reference: ordpy.permutation_entropy()
 import numpy as np
 import pytest
 
-from primitives import permutation_entropy
+from prmtvs import permutation_entropy
 
 import ordpy
 
