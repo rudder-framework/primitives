@@ -1,28 +1,15 @@
 # pmtvs
 
-Rust-accelerated primitives for signal analysis and dynamical systems.
-
-281 pure mathematical functions. Arrays in, numbers out.
-
-## Install
+281 pure math functions for signal analysis and dynamical systems. Rust-accelerated. numpy in, scalars out.
 
 ```bash
 pip install pmtvs
 ```
 
-## Usage
-
 ```python
-from pmtvs import hurst_exponent, permutation_entropy, BACKEND
+from pmtvs import lyapunov_exponent, hurst_exponent, ftle_local_linearization, permutation_entropy
 
-import numpy as np
-y = np.cumsum(np.random.randn(1000))
-
-print(hurst_exponent(y))       # ~0.98 (persistent random walk)
-print(permutation_entropy(y))  # ~0.95 (high complexity)
-print(BACKEND)                 # "rust" or "python"
+le = lyapunov_exponent(signal)
 ```
 
-## License
-
-MIT
+Part of the [Rudder Framework](https://github.com/rudder-framework).
