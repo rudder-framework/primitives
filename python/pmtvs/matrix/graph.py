@@ -327,6 +327,111 @@ def temporal_distance_matrix(
     return squareform(distances)
 
 
+def graph_laplacian_spectrum(
+    adjacency: np.ndarray,
+    normalized: bool = True
+) -> dict:
+    """
+    Compute eigenvalue spectrum of graph Laplacian from adjacency matrix.
+
+    Parameters
+    ----------
+    adjacency : np.ndarray
+        Square symmetric matrix of pairwise similarities/weights.
+        Values should be non-negative. Diagonal is ignored (set to 0).
+    normalized : bool
+        If True, use normalized Laplacian (eigenvalues in [0, 2]).
+        If False, use unnormalized Laplacian.
+
+    Returns
+    -------
+    dict with keys:
+        eigenvalues : np.ndarray      — full sorted spectrum
+        algebraic_connectivity : float — second-smallest eigenvalue (Fiedler value)
+        spectral_gap : float          — λ_1 / λ_{n-1} (normalized gap)
+        n_components : int            — number of near-zero eigenvalues (connected components)
+        effective_connectivity : float — mean of non-zero eigenvalues (mean coupling strength)
+        max_eigenvalue : float        — largest eigenvalue
+
+    Notes
+    -----
+    Given adjacency matrix A (n x n, non-negative, symmetric):
+      Degree matrix D = diag(row sums of A)
+      Unnormalized Laplacian: L = D - A
+      Normalized Laplacian: L_norm = D^{-1/2} L D^{-1/2} = I - D^{-1/2} A D^{-1/2}
+
+    Eigenvalues λ_0 ≤ λ_1 ≤ ... ≤ λ_{n-1}:
+      λ_0 = 0 always (connected component)
+      λ_1 = algebraic connectivity (Fiedler value) — larger = more connected
+      Number of zero eigenvalues = number of connected components
+    """
+    adjacency = np.asarray(adjacency, dtype=np.float64)
+    n = adjacency.shape[0]
+
+    if n < 2:
+        return {
+            'eigenvalues': np.array([0.0]),
+            'algebraic_connectivity': 0.0,
+            'spectral_gap': np.nan,
+            'n_components': 1,
+            'effective_connectivity': 0.0,
+            'max_eigenvalue': 0.0,
+        }
+
+    # Clean adjacency: symmetric, non-negative, zero diagonal
+    A = np.abs(adjacency).copy()
+    np.fill_diagonal(A, 0.0)
+    A = (A + A.T) / 2  # force symmetry
+
+    # Replace NaN with 0 (no coupling assumed)
+    A = np.where(np.isfinite(A), A, 0.0)
+
+    # Degree matrix
+    degrees = A.sum(axis=1)
+    D = np.diag(degrees)
+
+    # Laplacian
+    L = D - A
+
+    if normalized:
+        # D^(-1/2)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            d_inv_sqrt = np.where(degrees > 1e-12, 1.0 / np.sqrt(degrees), 0.0)
+        D_inv_sqrt = np.diag(d_inv_sqrt)
+        L = D_inv_sqrt @ L @ D_inv_sqrt
+
+    # Eigenvalues (symmetric matrix → use eigh for stability)
+    eigenvalues = np.linalg.eigh(L)[0]
+    eigenvalues = np.sort(eigenvalues)
+
+    # Clamp near-zero negatives from numerical noise
+    eigenvalues = np.maximum(eigenvalues, 0.0)
+
+    # Count connected components (eigenvalues < threshold)
+    zero_threshold = 1e-8
+    n_components = int(np.sum(eigenvalues < zero_threshold))
+
+    # Fiedler value (algebraic connectivity) = second-smallest eigenvalue
+    algebraic_connectivity = float(eigenvalues[1])
+
+    # Spectral gap
+    max_eig = float(eigenvalues[-1])
+    spectral_gap = float(algebraic_connectivity / max_eig) if max_eig > 1e-12 else np.nan
+
+    # Effective connectivity
+    nonzero_eigs = eigenvalues[eigenvalues >= zero_threshold]
+    effective = float(np.mean(nonzero_eigs)) if len(nonzero_eigs) > 0 else 0.0
+
+    return {
+        'eigenvalues': eigenvalues,
+        'algebraic_connectivity': algebraic_connectivity,
+        'spectral_gap': spectral_gap,
+        'n_components': n_components,
+        'effective_connectivity': effective,
+        'max_eigenvalue': max_eig,
+    }
+
+
 def recurrence_matrix(
     signals: np.ndarray,
     threshold: float = None,
